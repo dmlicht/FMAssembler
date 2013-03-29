@@ -1,5 +1,11 @@
+This is my implementation of an FM index for my Computational Genomics research project
+to learn more about FM index: http://en.wikipedia.org/wiki/Fm_index
+
+to run:
+python fmindex.py /path/to/file_containing_text_to_index.txt
+
 //TODO
-efficient suffix sort
+efficient suffix sort - specifically DC3.
 occurences of string
 longest reoccuring substring
 most occuring substring of given length
