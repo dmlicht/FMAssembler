@@ -49,46 +49,40 @@ class FMIndex(object):
             current_cumulative_position += value
         return t_ranks, cumulative_index
 
-    # def calculate_checkpoints(self, l):
-    #     checkpoints = {}
-    #     counts = {}
-    #     for i, char in enumerate(l):
-    #         if counts.get(char) == None:
-    #             counts[char] = 0
-    #             checkpoints[char] = []
-    #         else:
-    #             counts[char] += 1
-    #             if i % self.checkpoint_spacing == 0:
-    #                 for c in checkpoints.keys():
-    #                     checkpoints[c].append(counts[c])
-    #     return checkpoints
-
-    #TODO implement checkpoint table to save memory
-    #TODO refactor t rank checkpoints and calculation to seperate class
-    def get_rank(self, char, row):
-        """get the t rank of given character with respect to row.
-        that is, number of times the character has occured"""
-        i = row
-        while self.l[i] != char and i > 0:
-            i -= 1
-        return self.t_ranks[i]
-
     def get_range(self, p):
-        """get the range of indices for matches of given string p"""
+        """get the range of rows containing indices for hits of given pattern
+        returning start with value greater than end indicates no hits were found"""
         rs = reversed(p)
         start = 0
         end = len(self.text) - 1
         for c in rs:
-            #TODO figure out cleaner fix
+            print c
+            #This checks if the letter is present in the text. if not exit with start after end
+            #start after end indicates that no hits were found
             if c not in self.cumulative_index.keys():
                 start = end + 1
                 return start, end
-            start = self.get_rank(c, start) + self.cumulative_index[c]
-            end = self.get_rank(c, end) + self.cumulative_index[c]
+
+            start = self.get_rank(c, start, "up") + self.cumulative_index[c]
+            end = self.get_rank(c, end, "down") + self.cumulative_index[c]
+            print start, end
             #if there are no matches
             if start > end:
-                return start, end
+                return start, end + 1
         return start, end + 1
+
+    #TODO implement checkpoint table to save memory
+    #TODO refactor t rank checkpoints and calculation to seperate class
+    def get_rank(self, char, row, direction):
+        """get the t rank of given character with respect to row.
+        that is, number of times the character has occured up to that row"""
+        i = row
+        while self.l[i] != char and i > 0:
+            if direction == "up":
+                i += 1
+            elif direction == "down":
+                i -= 1
+        return self.t_ranks[i]
 
     #note this is currently somewhat pointless, the original t is still being stored
     def reverse(self, reversal_start_index=0):
@@ -111,6 +105,7 @@ class FMIndex(object):
     def occurrences(self, p):
         """return indices of occurrences of pattern in the text"""
         start, end = self.get_range(p)
+        print start, end
         if start < end:
             return self.suffix_array[start:end]
         else:
