@@ -1,4 +1,6 @@
 class Compressor(object):
+    """Compressor object. this may have to be combined with FM index to avoid
+    taking multiple passes through the text"""
     def __init__(self):
         pass
 

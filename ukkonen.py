@@ -17,6 +17,8 @@ class Edge(object):
         self.label = self.label + s
 
 class Ukkonen(object):
+    """Test implementation of Ukkonen's algorithm for 
+    linear time suffix sorting of the text."""
     def __init__(self, t):
         self.t = t
         self.implicit_suffix_tree_root = Node()

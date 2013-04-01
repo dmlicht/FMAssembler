@@ -1,5 +1,4 @@
 import fmindex
-import collections
 
 s = "Tomorrow_and_tomorrow_and_tomorrow"
 fm_index = fmindex.FMIndex("Tomorrow_and_tomorrow_and_tomorrow")

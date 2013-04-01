@@ -1,11 +1,30 @@
-This is my implementation of an FM index for my Computational Genomics research project
+This is my implementation of an FM index for my Computational Genomics research project on assembly using an FM index.
+
 to learn more about FM index: http://en.wikipedia.org/wiki/Fm_index
 
 to run:
 python fmindex.py /path/to/file_containing_text_to_index.txt
 
+//Overview
+
+- fmindex.py contains main functionality. It builds an FM index of a given text and allows a user to search for occurences of the text. This currently uses naive text sorting to generate the suffix array.
+- t_rank.py contains the checkpoint data structure for t_rank lookup with sublinear memory footprint (sublinear memory footprint not yet implemented - see below)
+- bw_compressor.py contains testing algorithms for compressing the text, decompressing the text, and searching compressed text. (see below for what is incomplete)
+- ukkonen.py (incomplete)
+
+
+//Notes
+- Cannot yet implement efficient memory until all checkpoints are in place and compression is done on last row of burrows wheeler matrix to store text.
+- bw_compressor.py has compression implemented, but not decompression, or search of compressed text
+
+
 //TODO
-efficient suffix sort - specifically DC3.
-occurences of string
-longest reoccuring substring
-most occuring substring of given length
+- efficient suffix sort 
+  - Ukonnen's Algorithm
+  - DC3
+- Longest Recurring Substring
+- Recurring Substrings over given length
+
+// Look Into Queue
+- Parallelization of DC3 algorithm
+- Using Cython and implementation of compute intensive procedures in C
