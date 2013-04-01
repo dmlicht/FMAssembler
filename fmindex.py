@@ -2,16 +2,16 @@
 #   txt = f.read()
 import collections
 import sys
+import t_rank
 
 class FMIndex(object):
     def __init__(self, text):
         self.text = text + "$"
 
         self.suffix_array = self.create_suffix_array(self.text)
-        self.l = self.BW_transform(self.suffix_array)
-        self.t_ranks, self.cumulative_index = self.calculate_t_ranks_and_cumulative_index(self.l)
-        # self.checkpoint_spacing = 4
-        # self.checkpoints = self.calculate_checkpoints(self.l)
+        self.last_column = self.BW_transform(self.suffix_array)
+        self.t_ranks, self.cumulative_index = self.calculate_t_ranks_and_cumulative_index(self.last_column)
+        self.rank_cps = t_rank.TRank(self.last_column, self.cumulative_index.keys())
 
     #TODO implement linear time suffix array creation algorithm
     def create_suffix_array(self, text):
@@ -56,41 +56,42 @@ class FMIndex(object):
         start = 0
         end = len(self.text) - 1
         for c in rs:
-            print c
-            #This checks if the letter is present in the text. if not exit with start after end
-            #start after end indicates that no hits were found
-            if c not in self.cumulative_index.keys():
+
+            #if query contains character not present anywhere in the text
+            #return immmediate with values that indicate there are no hits
+            if c not in self.cumulative_index.keys(): 
                 start = end + 1
                 return start, end
-
-            start = self.get_rank(c, start, "up") + self.cumulative_index[c]
-            end = self.get_rank(c, end, "down") + self.cumulative_index[c]
-            print start, end
-            #if there are no matches
-            if start > end:
+            print c, start, end
+            #TODO figure out why start index is one behind 
+            start = self.rank_cps.get_char_occurences_at_row(c, start) + self.cumulative_index[c] + 1
+            end = self.rank_cps.get_char_occurences_at_row(c, end) + self.cumulative_index[c]
+            if start > end:     #if there are no matches
                 return start, end + 1
         return start, end + 1
 
     #TODO implement checkpoint table to save memory
     #TODO refactor t rank checkpoints and calculation to seperate class
-    def get_rank(self, char, row, direction):
-        """get the t rank of given character with respect to row.
-        that is, number of times the character has occured up to that row"""
-        i = row
-        while self.l[i] != char and i > 0:
-            if direction == "up":
-                i += 1
-            elif direction == "down":
-                i -= 1
-        return self.t_ranks[i]
+    # def get_rank(self, char, row, direction):
+    #     """get the t rank of given character with respect to row.
+    #     that is, number of times the character has occured up to that row"""
+    #     i = row
+    #     while self.last_column[i] != char and i > 0:
+    #         if direction == "up":
+    #             i += 1
+    #         elif direction == "down":
+    #             i -= 1
+    #     return self.t_ranks[i]
 
-    #note this is currently somewhat pointless, the original t is still being stored
+    #NOTE: this method is currently pointless because original text is still being stored
+    #as of now, it functions as a sanity check to see if the index is working properly
+    #it will be more useful when we compress the text.
     def reverse(self, reversal_start_index=0):
         """retrieves the text from the bwt"""
         word = ""
         current_string_index = reversal_start_index
-        while self.l[current_string_index] != '$':
-            current_letter = self.l[current_string_index]
+        while self.last_column[current_string_index] != '$':
+            current_letter = self.last_column[current_string_index]
             word = current_letter + word
             current_letter_t_rank = self.t_ranks[current_string_index]
             current_string_index = self.cumulative_index[current_letter] + current_letter_t_rank
@@ -124,11 +125,10 @@ def main():
     try:
         while True:
             p = raw_input("Enter string to search for occurences: ")
-            print p
             print sorted(fm_index.occurrences(p))
             print [fm_index.text[i:i+len(p)] for i in fm_index.occurrences(p)]
     except(EOFError):
-        print
+        print ""
         exit(0)
 
 if __name__ == "__main__":
