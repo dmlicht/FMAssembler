@@ -9,8 +9,8 @@ class FMIndex(object):
         self.text = text + "$"
 
         self.suffix_array = self.create_suffix_array(self.text)
-        self.last_column = self.BW_transform(self.suffix_array)
-        self.t_ranks, self.cumulative_index = self.calculate_t_ranks_and_cumulative_index(self.last_column)
+        self.last_column = [self.text[i-1] for i in self.suffix_array]
+        self.cumulative_index = self.calculate_cumulative_index(self.last_column)
         self.rank_cps = t_rank.TRank(self.last_column, self.cumulative_index.keys())
 
     #TODO: implement linear time suffix array creation algorithm
@@ -27,27 +27,17 @@ class FMIndex(object):
             i += 1
         return ord(self.text[x+i]) - ord(self.text[y+i])
 
-    def BW_transform(self, suffix_array):
-        """burrows wheeler transform uses suffix array to get character that occurs
-        right before the suffix to find the character that would be in the last column
-        of a BW matrix"""
-        return [self.text[i-1] for i in suffix_array]
-
-    def calculate_t_ranks_and_cumulative_index(self, l):
+    def calculate_cumulative_index(self, l):
         """create array of t-rank values of characters in 
         the last column of the bw matrix"""
-        letter_counts = collections.defaultdict(int)
-        t_ranks = []
-        for letter in l:
-            t_ranks.append(letter_counts[letter])
-            letter_counts[letter] += 1
-        sorted_counts = sorted(letter_counts.items())
+        counter = collections.Counter(l)
+        sorted_counts = sorted(counter.items())
         current_cumulative_position = 0
         cumulative_index = {}
         for (key, value) in sorted_counts:
             cumulative_index[key] = current_cumulative_position
             current_cumulative_position += value
-        return t_ranks, cumulative_index
+        return cumulative_index
 
     def get_range(self, p):
         """get the range of rows containing indices for hits of given pattern
@@ -63,17 +53,15 @@ class FMIndex(object):
                 start = end + 1
                 return start, end
 
+
+            #TODO: figure out why start index is on~e behind 
+            start = self.rank_cps.rank_at_row(c, start - 1) + self.cumulative_index[c] + 1
+            end = self.rank_cps.rank_at_row(c, end) + self.cumulative_index[c]
             print c, start, end
 
-            #TODO: figure out why start index is one behind 
-            start = self.rank_cps.get_char_occurences_at_row(c, start) + self.cumulative_index[c] + 1
-            end = self.rank_cps.get_char_occurences_at_row(c, end) + self.cumulative_index[c]
             if start > end:     #if there are no matches
                 return start, end + 1
         return start, end + 1
-
-    #TODO: implement checkpoint table to save memory
-    #TODO: refactor t rank checkpoints and calculation to seperate class
 
     # def get_rank(self, char, row, direction):
     #     """get the t rank of given character with respect to row.

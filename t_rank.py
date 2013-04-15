@@ -24,19 +24,21 @@ class TRank(object):
         """saves number of occurences of each character at checkpoint row"""
         self.checkpoints[checkpoint_row] = self.char_occurences.copy()
 
-    def get_char_occurences_at_row(self, char, row):
-        """returns number of character occurences up to given row. Includes occurences at row"""
+    def rank_at_row(self, char, row):
+        """returns number of character occurences up to given row. 
+        INCLUDING occurences at given row"""
 
         #save ourselves trouble if the character does not occur at all
-        if char not in self.characters:
-            return 0
+        if char not in self.characters or row < 0:
+            return -1
 
         distance_from_prev_cp = row % self.cp_interval
         prev_cp_index = row - distance_from_prev_cp
         t_rank_at_prev_index = self.checkpoints[prev_cp_index][char]
-        print t_rank_at_prev_index
+
         #previous cp_index + 1 because the checkpoints count occurences that happen on their index
         occurences_after_checkpoint = self.count_up(char, prev_cp_index + 1, row + 1)
+        print prev_cp_index, row
         return t_rank_at_prev_index + occurences_after_checkpoint
 
     def count_up(self, char, from_index, to_index):
