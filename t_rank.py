@@ -38,7 +38,7 @@ class TRank(object):
 
         #previous cp_index + 1 because the checkpoints count occurences that happen on their index
         occurences_after_checkpoint = self.count_up(char, prev_cp_index + 1, row + 1)
-        print prev_cp_index, row
+        # print prev_cp_index, row
         return t_rank_at_prev_index + occurences_after_checkpoint
 
     def count_up(self, char, from_index, to_index):

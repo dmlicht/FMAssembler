@@ -57,7 +57,7 @@ class FMIndex(object):
             #TODO: figure out why start index is on~e behind 
             start = self.rank_cps.rank_at_row(c, start - 1) + self.cumulative_index[c] + 1
             end = self.rank_cps.rank_at_row(c, end) + self.cumulative_index[c]
-            print c, start, end
+            # print c, start, end
 
             if start > end:     #if there are no matches
                 return start, end + 1
@@ -97,7 +97,7 @@ class FMIndex(object):
     def occurrences(self, p):
         """return indices of occurrences of pattern in the text"""
         start, end = self.get_range(p)
-        print start, end
+        # print start, end
         if start < end:
             return self.suffix_array[start:end]
         else:

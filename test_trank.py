@@ -35,13 +35,3 @@ def test_lookup_sanity_check():
     for i in xrange(1, len(d)):
         c = d[i]
         assert ranks.rank_at_row(c, i) == 1 + ranks.rank_at_row(c, i - 1)
-
-
-# for (index, cp) in sorted(ranks.checkpoints.items()):
-#     print str(index) + ': ', [x for x in cp.items() if x[1] > -1]
-
-# test_lookup_sanity_check()
-
-    # print [x for x in checkpoint.items() if x[1] > -1]
-# print [x for x in ranks.checkpoints[0].items() if x[1] > -1]
-# print ''.join(fm.last_column)
