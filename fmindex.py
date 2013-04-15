@@ -13,7 +13,7 @@ class FMIndex(object):
         self.t_ranks, self.cumulative_index = self.calculate_t_ranks_and_cumulative_index(self.last_column)
         self.rank_cps = t_rank.TRank(self.last_column, self.cumulative_index.keys())
 
-    #TODO implement linear time suffix array creation algorithm
+    #TODO: implement linear time suffix array creation algorithm
     def create_suffix_array(self, text):
         """create suffix array representation of given text"""
         suffix_refs = range(len(self.text))
@@ -62,16 +62,19 @@ class FMIndex(object):
             if c not in self.cumulative_index.keys(): 
                 start = end + 1
                 return start, end
+
             print c, start, end
-            #TODO figure out why start index is one behind 
+
+            #TODO: figure out why start index is one behind 
             start = self.rank_cps.get_char_occurences_at_row(c, start) + self.cumulative_index[c] + 1
             end = self.rank_cps.get_char_occurences_at_row(c, end) + self.cumulative_index[c]
             if start > end:     #if there are no matches
                 return start, end + 1
         return start, end + 1
 
-    #TODO implement checkpoint table to save memory
-    #TODO refactor t rank checkpoints and calculation to seperate class
+    #TODO: implement checkpoint table to save memory
+    #TODO: refactor t rank checkpoints and calculation to seperate class
+
     # def get_rank(self, char, row, direction):
     #     """get the t rank of given character with respect to row.
     #     that is, number of times the character has occured up to that row"""
@@ -86,16 +89,16 @@ class FMIndex(object):
     #NOTE: this method is currently pointless because original text is still being stored
     #as of now, it functions as a sanity check to see if the index is working properly
     #it will be more useful when we compress the text.
-    def reverse(self, reversal_start_index=0):
-        """retrieves the text from the bwt"""
-        word = ""
-        current_string_index = reversal_start_index
-        while self.last_column[current_string_index] != '$':
-            current_letter = self.last_column[current_string_index]
-            word = current_letter + word
-            current_letter_t_rank = self.t_ranks[current_string_index]
-            current_string_index = self.cumulative_index[current_letter] + current_letter_t_rank
-        return word
+    # def reverse(self, reversal_start_index=0):
+    #     """retrieves the text from the bwt"""
+    #     word = ""
+    #     current_string_index = reversal_start_index
+    #     while self.last_column[current_string_index] != '$':
+    #         current_letter = self.last_column[current_string_index]
+    #         word = current_letter + word
+    #         current_letter_t_rank = self.t_ranks[current_string_index]
+    #         current_string_index = self.cumulative_index[current_letter] + current_letter_t_rank
+    #     return word
 
     def contains_substring(self, p):
         """the range of indices pointing the the substring
@@ -125,8 +128,10 @@ def main():
     try:
         while True:
             p = raw_input("Enter string to search for occurences: ")
-            print sorted(fm_index.occurrences(p))
-            print [fm_index.text[i:i+len(p)] for i in fm_index.occurrences(p)]
+            occurences = fm_index.occurrences(p)
+            print sorted(occurences)
+            print [fm_index.text[i:i+len(p)] for i in occurences]
+            print len(occurences)
     except(EOFError):
         print ""
         exit(0)

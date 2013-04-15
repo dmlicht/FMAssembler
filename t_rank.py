@@ -4,6 +4,7 @@ class TRank(object):
 
     def __init__(self, last_column, characters, cp_interval=4):
         self.checkpoints = {}
+        self.characters = characters
         self.last_column = last_column
         self.cp_interval = cp_interval
 
@@ -25,10 +26,17 @@ class TRank(object):
 
     def get_char_occurences_at_row(self, char, row):
         """returns number of character occurences up to given row. Includes occurences at row"""
+
+        #save ourselves trouble if the character does not occur at all
+        if char not in self.characters:
+            return 0
+
         distance_from_prev_cp = row % self.cp_interval
         prev_cp_index = row - distance_from_prev_cp
         t_rank_at_prev_index = self.checkpoints[prev_cp_index][char]
-        occurences_after_checkpoint = self.count_up(char, prev_cp_index, row+1)
+        print t_rank_at_prev_index
+        #previous cp_index + 1 because the checkpoints count occurences that happen on their index
+        occurences_after_checkpoint = self.count_up(char, prev_cp_index + 1, row + 1)
         return t_rank_at_prev_index + occurences_after_checkpoint
 
     def count_up(self, char, from_index, to_index):
