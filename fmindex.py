@@ -1,17 +1,27 @@
-# with open('complete_works.txt', 'r') as f:
-#   txt = f.read()
 import collections
 import sys
 import t_rank
+from suffix_array import Suffix_array
+# import tools
+
 
 class FMIndex(object):
     def __init__(self, text):
-        self.text = text + "$"
+            #handles pysuffix sorting
+            self.text = text
 
-        self.suffix_array = self.create_suffix_array(self.text)
-        self.last_column = [self.text[i-1] for i in self.suffix_array]
-        self.cumulative_index = self.calculate_cumulative_index(self.last_column)
-        self.rank_cps = t_rank.TRank(self.last_column, self.cumulative_index.keys())
+            # text_unicode = tools.utf82unicode(text)
+            sa = Suffix_array()
+            sa._add_str(text)
+            sa.karkkainen_sort()
+            sa.str_array = "" #free up some memory
+            self.suffix_array = sa.suffix_array[:-3] #for some reason pysuffix appends 3 0's at the end of the suffix array
+            sa = "" #free up more mem
+
+            # self.suffix_array = self.create_suffix_array(self.text)
+            self.last_column = [self.text[i-1] for i in self.suffix_array]
+            self.cumulative_index = self.calculate_cumulative_index(self.last_column)
+            self.rank_cps = t_rank.TRank(self.last_column, self.cumulative_index.keys())
 
     #TODO: implement linear time suffix array creation algorithm
     def create_suffix_array(self, text):
@@ -24,6 +34,8 @@ class FMIndex(object):
         checks which points to a greater valued suffix"""
         i = 0
         while self.text[x+i] == self.text[y+i]:
+            if self.text[x+i] == '$':
+                return x - y
             i += 1
         return ord(self.text[x+i]) - ord(self.text[y+i])
 
@@ -51,42 +63,14 @@ class FMIndex(object):
             #return immmediate with values that indicate there are no hits
             if c not in self.cumulative_index.keys(): 
                 start = end + 1
-                return start, end
+                break
 
-
-            #TODO: figure out why start index is on~e behind 
             start = self.rank_cps.rank_at_row(c, start - 1) + self.cumulative_index[c] + 1
             end = self.rank_cps.rank_at_row(c, end) + self.cumulative_index[c]
-            # print c, start, end
 
             if start > end:     #if there are no matches
-                return start, end + 1
+                break
         return start, end + 1
-
-    # def get_rank(self, char, row, direction):
-    #     """get the t rank of given character with respect to row.
-    #     that is, number of times the character has occured up to that row"""
-    #     i = row
-    #     while self.last_column[i] != char and i > 0:
-    #         if direction == "up":
-    #             i += 1
-    #         elif direction == "down":
-    #             i -= 1
-    #     return self.t_ranks[i]
-
-    #NOTE: this method is currently pointless because original text is still being stored
-    #as of now, it functions as a sanity check to see if the index is working properly
-    #it will be more useful when we compress the text.
-    # def reverse(self, reversal_start_index=0):
-    #     """retrieves the text from the bwt"""
-    #     word = ""
-    #     current_string_index = reversal_start_index
-    #     while self.last_column[current_string_index] != '$':
-    #         current_letter = self.last_column[current_string_index]
-    #         word = current_letter + word
-    #         current_letter_t_rank = self.t_ranks[current_string_index]
-    #         current_string_index = self.cumulative_index[current_letter] + current_letter_t_rank
-    #     return word
 
     def contains_substring(self, p):
         """the range of indices pointing the the substring
@@ -103,6 +87,54 @@ class FMIndex(object):
         else:
             return []
 
+    def find_prefixes(self, p):
+        occurences = self.occurrences(p)
+        prefixes = [occ for occ in occurences if self.text[occ-1] == '$']
+        # prefix_strings = 
+        return prefixes
+
+    #NOTE: This method only works if multiple reads are passed as a '$' seperated txt
+    def get_nth_read(self, n):
+        """Gets the nth stored element
+        O(|read|) runtime"""
+        chars = []
+        row = n
+        bw_c = self.last_column[row]
+        chars.append(bw_c)
+        while bw_c != '$':
+            row = self.rank_cps.rank_at_row(bw_c, row - 1) + self.cumulative_index[bw_c] + 1
+            bw_c = self.last_column[row]
+            chars.append(bw_c)
+        return ''.join(reversed(chars))[1:]
+
+    #NOTE: Refactor when text is no longer saved
+    def get_read_at_offset(self, offset):
+        """returns the read that occurs at given offset
+        O(|read|) runtime"""
+        before = []
+        after = []
+
+        #get all characters up to previous seperator
+        for i in xrange(1, offset + 1):
+            prev_char = self.text[offset - i]
+            if prev_char == '$':
+                break
+            else:
+                before.append(prev_char)
+
+        #get all character up to next seperator
+        for i in xrange(len(self.text) - offset):
+            next_char = self.text[offset + i]
+            if next_char == '$':
+                break
+            else:
+                after.append(next_char)
+
+        before = ''.join(reversed(before))
+        after = ''.join(after)
+        return before + after
+
+
 def main():
     if len(sys.argv) != 2:
         print "Please call script in the following format: python fm_index.py file_to_build_index_of.txt"
@@ -111,7 +143,10 @@ def main():
     with open(sys.argv[1]) as f:
         t = f.read()
 
-    fm_index = FMIndex(t)
+    fm_index = FMIndex(t + '$')
+    # exit(0)
+
+
     print "text processed, enter EOF when done."
     try:
         while True:
@@ -126,9 +161,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# fm_index = FMIndex("Tomorrow and tomorrow and tomorrow")
-# print ''.join(fm_index.l) == "w$wwdd__nnoooaattTmmmrrrrrrooo__ooo"
-# print fm_index.l
-# print fm_index.reverse()
-# print fm_index.occurrences("row")

@@ -17,6 +17,8 @@ python fmindex.py /path/to/file_containing_text_to_index.txt
 - Cannot yet implement efficient memory until all checkpoints are in place and compression is done on last row of burrows wheeler matrix to store text.
 - bw_compressor.py has compression implemented, but not decompression, or search of compressed text
 
+- suffix_array.py and tools.py taken from https://code.google.com/p/pysuffix/
+
 
 //TODO
 - efficient suffix sort 
@@ -24,6 +26,8 @@ python fmindex.py /path/to/file_containing_text_to_index.txt
   - DC3
 - Longest Recurring Substring
 - Recurring Substrings over given length
+- Compress Burrows wheeler transformed string and free reference to original string
+- add checkpointing to indices for pattern lookup
 
 // Look Into Queue
 - Parallelization of DC3 algorithm
