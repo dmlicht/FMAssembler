@@ -14,20 +14,29 @@ python fmindex.py /path/to/file_containing_text_to_index.txt
 
 - assembler.py
     Takes a set of reads from user and passes them to index. Then uses the index to query for overlap edges to pass to the overlap graph
+
 - fmindex.py 
     builds compressed index of a given text and allows a user to search for occurences of the text. This uses pysuffix library for Karkainnen suffix sorting.
+
 - overlap_graph.py
     maintains data structure of edges and travelsal algorithm to return contigs implied by reads.
+
 - t_rank.py 
     contains the checkpoint data structure for t_rank lookup with sublinear memory footprint (sublinear memory footprint not yet implemented - see below)
+
 - genome_splitter.py
     takes a genome sequences and cuts it up to simulate lots of reads for testing
+
 - bw_compressor.py (incomplete)
     contains testing algorithms for compressing the text, decompressing the text, and searching compressed text. (see below for what is incomplete)
+
 - ukkonen.py (incomplete)
     toy implementation of ukkonen's algorithm for suffix sorting.
 
-- suffix_array.py and tools.py taken directly from pysuffix library: https://code.google.com/p/pysuffix/ I take no credit for anything in those two files (except the comments saying that they aren't mine :P)
+
+//Notes
+
+suffix_array.py and tools.py taken directly from pysuffix library: https://code.google.com/p/pysuffix/ I take no credit for anything in those two files (except the comments saying that they aren't mine :P)
 
 
 //TODO                                                                      time est
