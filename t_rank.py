@@ -44,7 +44,11 @@ class TRank(object):
     def count_up(self, char, from_index, to_index):
         """counts occurences of char between from_index and to_index"""
         occurences = 0
+        # print 'from_index:', from_index
+        # print 'to_index', to_index
+        # print len(self.last_column)
         for i in xrange(from_index, to_index):
+            # print char
             if self.last_column[i] == char:
                 occurences += 1
         return occurences

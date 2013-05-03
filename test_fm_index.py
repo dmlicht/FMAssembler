@@ -5,15 +5,15 @@ s = "Tomorrow_and_tomorrow_and_tomorrow"
 
 fm_index = fmindex.FMIndex(s)
 
-def test_calculate_cumulative_index():
+def test_calculate_occ_lex_lower():
     counter = Counter(s)
-    cumulative_index = fm_index.calculate_cumulative_index(s)
+    occ_lex_lower = fm_index.calculate_occ_lex_lower(s)
     sorted_counts = sorted(counter.items())
     for i in xrange(len(sorted_counts)-1):
         current_letter = sorted_counts[i][0]
         next_letter = sorted_counts[i+1][0]
         current_letter_count = sorted_counts[i][1]
-        diff = cumulative_index[next_letter] - cumulative_index[current_letter]
+        diff = occ_lex_lower[next_letter] - occ_lex_lower[current_letter]
         assert current_letter_count == diff
 
 def test_counts_from_get_occurences():

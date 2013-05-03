@@ -1,34 +1,40 @@
-This is my implementation of an FM index for my Computational Genomics research project on assembly using an FM index.
+#David Lichtenberg
+#Dlichte5@jhu.edu
+#FMAssembler
 
-to learn more about FM index: http://en.wikipedia.org/wiki/Fm_index
+This project is a python implementation of an overlap graph based assembler that uses the FM-Index compressed data structure.
 
-to run:
+to run assembler:
+python assembler.py /path/to/file_containing_newline_seperated_reads.txt
+
+to run index on arbitrary text:
 python fmindex.py /path/to/file_containing_text_to_index.txt
 
 //Overview
 
-- fmindex.py contains main functionality. It builds an FM index of a given text and allows a user to search for occurences of the text. This currently uses naive text sorting to generate the suffix array.
-- t_rank.py contains the checkpoint data structure for t_rank lookup with sublinear memory footprint (sublinear memory footprint not yet implemented - see below)
-- bw_compressor.py contains testing algorithms for compressing the text, decompressing the text, and searching compressed text. (see below for what is incomplete)
+- assembler.py
+    Takes a set of reads from user and passes them to index. Then uses the index to query for overlap edges to pass to the overlap graph
+- fmindex.py 
+    builds compressed index of a given text and allows a user to search for occurences of the text. This uses pysuffix library for Karkainnen suffix sorting.
+- overlap_graph.py
+    maintains data structure of edges and travelsal algorithm to return contigs implied by reads.
+- t_rank.py 
+    contains the checkpoint data structure for t_rank lookup with sublinear memory footprint (sublinear memory footprint not yet implemented - see below)
+- genome_splitter.py
+    takes a genome sequences and cuts it up to simulate lots of reads for testing
+- bw_compressor.py (incomplete)
+    contains testing algorithms for compressing the text, decompressing the text, and searching compressed text. (see below for what is incomplete)
 - ukkonen.py (incomplete)
+    toy implementation of ukkonen's algorithm for suffix sorting.
 
-
-//Notes
-- Cannot yet implement efficient memory until all checkpoints are in place and compression is done on last row of burrows wheeler matrix to store text.
-- bw_compressor.py has compression implemented, but not decompression, or search of compressed text
-
-- suffix_array.py and tools.py taken from https://code.google.com/p/pysuffix/
+- suffix_array.py and tools.py taken directly from pysuffix library: https://code.google.com/p/pysuffix/ I take no credit for anything in those two files (except the comments saying that they aren't mine :P)
 
 
 //TODO
-- efficient suffix sort 
-  - Ukonnen's Algorithm
-  - DC3
-- Longest Recurring Substring
-- Recurring Substrings over given length
-- Compress Burrows wheeler transformed string and free reference to original string
-- add checkpointing to indices for pattern lookup
-
-// Look Into Queue
-- Parallelization of DC3 algorithm
-- Using Cython and implementation of compute intensive procedures in C
+- Run Length Encoding Burrows Wheeler Transform
+- sort seperator chars in burrows wheeler transform (hackish fix)
+- backwards search star (allows for any char matching in backwards search)
+- more efficient transitive edge reduction
+- read error correction
+- fm-index merge algorithm
+- re-implement fm index in c (port using cython) to save memory

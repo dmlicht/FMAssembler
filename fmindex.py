@@ -10,6 +10,7 @@ class FMIndex(object):
             #handles pysuffix sorting
             self.text = text
 
+            self.text_len = len(text)
             # text_unicode = tools.utf82unicode(text)
             sa = Suffix_array()
             sa._add_str(text)
@@ -19,14 +20,20 @@ class FMIndex(object):
             sa = "" #free up more mem
 
             # self.suffix_array = self.create_suffix_array(self.text)
-            self.last_column = [self.text[i-1] for i in self.suffix_array]
-            self.cumulative_index = self.calculate_cumulative_index(self.last_column)
-            self.rank_cps = t_rank.TRank(self.last_column, self.cumulative_index.keys())
 
-    #TODO: implement linear time suffix array creation algorithm
+            #bwt = burrows wheeler transformed string
+            self.bwt = [self.text[i-1] for i in self.suffix_array]
+
+            #occurences of lexicographically lower valued characters in text
+            self.occ_lex_lower = self.calculate_occ_lex_lower(self.bwt)
+            self.rank_cps = t_rank.TRank(self.bwt, self.occ_lex_lower.keys())
+
+    #NOTE:Below two function (csa, rc) not being used
+    #just temporarily kept to verify results of karkkainen sort
+    #until more permanant solution in place
     def create_suffix_array(self, text):
         """create suffix array representation of given text"""
-        suffix_refs = range(len(self.text))
+        suffix_refs = range(self.text_len)
         return sorted(suffix_refs, cmp=self.ref_comp)
 
     def ref_comp(self, x, y):
@@ -39,71 +46,106 @@ class FMIndex(object):
             i += 1
         return ord(self.text[x+i]) - ord(self.text[y+i])
 
-    def calculate_cumulative_index(self, l):
-        """create array of t-rank values of characters in 
-        the last column of the bw matrix"""
+    def calculate_occ_lex_lower(self, l):
+        """returns a dict containing the counts of occurences of 
+        lexicographically lower valued characters for a given character"""
         counter = collections.Counter(l)
         sorted_counts = sorted(counter.items())
-        current_cumulative_position = 0
-        cumulative_index = {}
+        lower_char_count = 0
+        occ_lex_lower = {}
         for (key, value) in sorted_counts:
-            cumulative_index[key] = current_cumulative_position
-            current_cumulative_position += value
-        return cumulative_index
+            occ_lex_lower[key] = lower_char_count
+            lower_char_count += value
+        return occ_lex_lower
+
+    def occurrences(self, p):
+        """return indices of occurrences of pattern in the text"""
+        start, end = self.get_range(p)
+        if start < end:
+            return self.suffix_array[start:end]
+        else:
+            return []
 
     def get_range(self, p):
         """get the range of rows containing indices for hits of given pattern
         returning start with value greater than end indicates no hits were found"""
         rs = reversed(p)
         start = 0
-        end = len(self.text) - 1
+        end = self.text_len - 1
         for c in rs:
-
-            #if query contains character not present anywhere in the text
-            #return immmediate with values that indicate there are no hits
-            if c not in self.cumulative_index.keys(): 
-                start = end + 1
-                break
-
-            start = self.rank_cps.rank_at_row(c, start - 1) + self.cumulative_index[c] + 1
-            end = self.rank_cps.rank_at_row(c, end) + self.cumulative_index[c]
-
-            if start > end:     #if there are no matches
+            start, end = self.backtrace_step(c, start, end)
+            if start > end:     #start will be greater than end if no matches
                 break
         return start, end + 1
 
+    def backtrace_step(self, c, start, end):
+        """returns start and end of range backtraced one step
+        start will be greater than end if no occurences w/in range"""
+        if c not in self.occ_lex_lower.keys(): 
+            start = end + 1
+            return start, end
+        start = self.rank_cps.rank_at_row(c, start - 1) + self.occ_lex_lower[c] + 1
+        end = self.rank_cps.rank_at_row(c, end) + self.occ_lex_lower[c]
+        return start, end
+
     def contains_substring(self, p):
-        """the range of indices pointing the the substring
-        will contain some elements if the pattern is present in the text"""
+        """returns true is there is at least one occurence of p indexed"""
         start, end = self.get_range(p)
         return start < end
 
-    def occurrences(self, p):
-        """return indices of occurrences of pattern in the text"""
-        start, end = self.get_range(p)
-        # print start, end
-        if start < end:
-            return self.suffix_array[start:end]
-        else:
-            return []
+    #in this function we backtrace the given pattern through the index
+    #checking for prefixes at every step (indicated by '$')
+    def get_prefix_overlaps(self, p, min_overlap_len):
+        """returns all strings with prefix overlap over given min_overlap_len"""
+        rs = reversed(p)
+        start = 0
+        end = self.text_len - 1
+        chars_into_p = 0
+        all_overlaps = []
+        for c in rs:
+            start, end = self.backtrace_step(c, start, end)
+            chars_into_p += 1
+            if start > end:
+                break
+            if min_overlap_len <= chars_into_p < len(p):
+                overlaps = self.elements_preceeded_by_sep(start, end)
+                # if overlaps:
+                #     print 'fm:', overlaps
+                overlaps = [(self.get_read_at_offset(i), chars_into_p) for i in overlaps]
+                all_overlaps.extend(overlaps)
+        return all_overlaps
+    #//NOTE: this function is very similar to get_range
+    #is there some clever way to re-use this code?
 
+    def elements_preceeded_by_sep(self, start, end):
+        """return list of indices between range directly preceeded by '$' """
+        indices = self.suffix_array[start:end+1]
+        return [i for i in indices if self.text[i-1] == '$']
+        # start, end = self.backtrace_step('$', start, end)
+        #+1 because we are getting the indices of the seperators, not the first chars
+        # return [i + 1 for i in self.suffix_array[start:end+1]] 
+
+    #NOTE: This function is no longer used
+    #This is left in tact for comparison to get_prefix_overlaps()
     def find_prefixes(self, p):
         occurences = self.occurrences(p)
         prefixes = [occ for occ in occurences if self.text[occ-1] == '$']
-        # prefix_strings = 
         return prefixes
 
     #NOTE: This method only works if multiple reads are passed as a '$' seperated txt
+    #NOTE: this function does not work using pysuffix does not prioritize
+    # seperator characters that occur earlier in the string
+    # to get this function working again, you must roll your own suffix sorting
     def get_nth_read(self, n):
         """Gets the nth stored element
         O(|read|) runtime"""
         chars = []
         row = n
-        bw_c = self.last_column[row]
+        bw_c = self.bwt[row]
         chars.append(bw_c)
         while bw_c != '$':
-            row = self.rank_cps.rank_at_row(bw_c, row - 1) + self.cumulative_index[bw_c] + 1
-            bw_c = self.last_column[row]
+            row = self.rank_cps.rank_at_row(bw_c, row - 1) + self.occ_lex_lower[bw_c] + 1
+            bw_c = self.bwt[row]
             chars.append(bw_c)
         return ''.join(reversed(chars))[1:]
 
@@ -123,7 +165,7 @@ class FMIndex(object):
                 before.append(prev_char)
 
         #get all character up to next seperator
-        for i in xrange(len(self.text) - offset):
+        for i in xrange(self.text_len - offset):
             next_char = self.text[offset + i]
             if next_char == '$':
                 break
