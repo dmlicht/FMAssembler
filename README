@@ -31,10 +31,11 @@ python fmindex.py /path/to/file_containing_text_to_index.txt
 
 
 //TODO
-- Run Length Encoding Burrows Wheeler Transform
-- sort seperator chars in burrows wheeler transform (hackish fix)
-- backwards search star (allows for any char matching in backwards search)
-- more efficient transitive edge reduction
-- read error correction
-- fm-index merge algorithm
-- re-implement fm index in c (port using cython) to save memory
+- Run Length Encoding Burrows Wheeler Transform                             (est: 20-30 min)
+- sort seperator chars in burrows wheeler transform (hackish fix)           (est: 10-20 min)
+- backwards search star (allows for any char matching in backwards search)  (est: 1-2 hours)
+- contig graph                                                              (est: .5 - 2 hours)
+- more efficient transitive edge reduction                                  (est: 2+ hours)
+- read error correction                                                     (est: n/a)
+- fm-index merge algorithm                                                  (est: n/a)
+- re-implement fm index in c (port using cython) to save memory             (est: n/a)

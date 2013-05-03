@@ -2,10 +2,10 @@ class TRank(object):
     """Maintains checkpoints of t-ranks for last row in BW matrix
     values of characters at checkpoint is 0 if character has not been seen at all"""
 
-    def __init__(self, last_column, characters, cp_interval=4):
+    def __init__(self, bwt, characters, cp_interval=4):
         self.checkpoints = {}
         self.characters = characters
-        self.last_column = last_column
+        self.bwt = bwt
         self.cp_interval = cp_interval
 
         #setting all values to nergative 1, because t-rank should be 0 at first occurence
@@ -15,7 +15,7 @@ class TRank(object):
     def create_checkpoints(self):
         """iterates through last column of BW matrix recording num occurences of
         each character seen. Stores current counts in checkpoint rows"""
-        for i, c in enumerate(self.last_column):
+        for i, c in enumerate(self.bwt):
             self.char_occurences[c] += 1        #track occurence of letter
             if i % self.cp_interval == 0:       #at specified interval
                 self.add_checkpoint(i)          #add checkpoint
@@ -46,9 +46,9 @@ class TRank(object):
         occurences = 0
         # print 'from_index:', from_index
         # print 'to_index', to_index
-        # print len(self.last_column)
+        # print len(self.bwt)
         for i in xrange(from_index, to_index):
             # print char
-            if self.last_column[i] == char:
+            if self.bwt[i] == char:
                 occurences += 1
         return occurences
