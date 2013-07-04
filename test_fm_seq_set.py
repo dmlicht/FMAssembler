@@ -24,12 +24,13 @@ def test_get_nth_read():
             print "problem with read " + str(i) + ":"
             print reads[i], '\n' ,ith_read_from_fm
 
-with open('test_files/phiX174_genome.txt') as f:
-    data = f.read()
+if __name__ == '__main__':
+    with open('test_files/phiX174_genome.txt') as f:
+        data = f.read()
 
-reads = test_assembler.split_into_reads(data, 2, 30, 10)
-joined_reads = '$'.join(reads) + '$'
-fmi = fmindex.FMIndex(joined_reads)
+    reads = test_assembler.split_into_reads(data, 2, 30, 10)
+    joined_reads = '$'.join(reads) + '$'
+    fmi = fmindex.FMIndex(joined_reads)
 
-test_get_read_at_offset()
-test_get_nth_read()
+    test_get_read_at_offset()
+    test_get_nth_read()

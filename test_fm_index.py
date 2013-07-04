@@ -45,4 +45,5 @@ def test_counts_from_get_occurences():
         print word
         assert fm_occurence_counts[word] == counter[word]
 
-test_counts_from_get_occurences()
+if __name__ == '__main__':
+    test_counts_from_get_occurences()

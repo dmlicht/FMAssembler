@@ -39,7 +39,8 @@ class Compressor(object):
         compressed_bwt.append((last_char, run))
         return compressed_bwt
 
-c = Compressor()
-s = "Tomorrow_and_tomorrow_and_tomorrow"
-print len(s)
-print c.bw_compress("Tomorrow_and_tomorrow_and_tomorrow")
+if __name__ == '__main__':
+    c = Compressor()
+    s = "Tomorrow_and_tomorrow_and_tomorrow"
+    print len(s)
+    print c.bw_compress("Tomorrow_and_tomorrow_and_tomorrow")

@@ -1,2 +1,5 @@
 __pycache__
+*.swo
+*.swp
 *.pyc
+.DS_Store
