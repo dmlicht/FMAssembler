@@ -1,16 +1,20 @@
-#David Lichtenberg
-#Dlichte5@jhu.edu
-#FMAssembler
+# FMAssembler
 
+A tool to efficiently assemble large datasets of overlapping strings (like genomes!). 
 This project is a python implementation of an overlap graph based assembler that uses the FM-Index compressed data structure.
 
+# David Lichtenberg
+# hello [at] davidlichtenberg [dot] com
+
 to run assembler:
-python assembler.py /path/to/file_containing_newline_seperated_reads.txt
+
+    python assembler.py /path/to/file_containing_newline_seperated_reads.txt
 
 to run index on arbitrary text:
-python fmindex.py /path/to/file_containing_text_to_index.txt
 
-//Overview
+    python fmindex.py /path/to/file_containing_text_to_index.txt
+
+## Overview
 
 - assembler.py
     Takes a set of reads from user and passes them to index. Then uses the index to query for overlap edges to pass to the overlap graph
@@ -34,12 +38,12 @@ python fmindex.py /path/to/file_containing_text_to_index.txt
     toy implementation of ukkonen's algorithm for suffix sorting.
 
 
-//Notes
+## Notes
 
 suffix_array.py and tools.py taken directly from pysuffix library: https://code.google.com/p/pysuffix/ I take no credit for anything in those two files (except the comments saying that they aren't mine :P)
 
 
-//TODO                                                                      time est
+## TODO                                                                     time est
 - Run Length Encoding Burrows Wheeler Transform                             20-30 m
 - sort seperator chars in burrows wheeler transform (hackish fix)           10-20 m
 - backwards search star (allows for any char matching in backwards search)  1-2 h
